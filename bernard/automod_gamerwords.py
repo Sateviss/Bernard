@@ -170,7 +170,7 @@ async def slur_filter(message):
     if punishment == "BAN_PERMA":
         punishment_journal_type = "BAN_MEMBER"
         ban = await common.ban_verbose(message.author, "AUTOMOD BAN_PERMA SCORE:{}".format(final_score))
-        if res is False:
+        if ban is False:
             await discord.bot.send_message(message.channel, "❓ Something's fucked! Unable to issue ban to Discord API. Bother <@{}>".format(config.cfg['bernard']['owner']))
 
     elif punishment == "BAN_24H" or punishment == "BAN_1H":
@@ -190,8 +190,8 @@ async def slur_filter(message):
                 target=message.author.id,
                 channel=message.channel.id,
                 timestamp=time_to_fire,
-                event="Automod (Gamerwords) SCORE:{0}".format(final_score),
-                msg=reason)
+                event="UNBAN_MEMBER",
+                msg="Automod (Gamerwords) SCORE:{0}".format(final_score))
 
     elif punishment == "KICK":
         punishment_journal_type = "KICK_MEMBER"
