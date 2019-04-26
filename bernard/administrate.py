@@ -21,7 +21,20 @@ logger.info("loading...")
 async def admin(ctx):
     if common.isDiscordAdministrator(ctx.message.author):
         if ctx.invoked_subcommand is None:
-            await discord.bot.say('Invalid subcommand... ```run | sql | system | modules | cfg | stats | blacklist```')
+            await discord.bot.say('Invalid subcommand... ```kill | run | sql | system | modules | cfg | stats | blacklist```')
+
+# allow the bot to be killed by regs+
+@admin.command(pass_context=True, hidden=True)
+async def kill(ctx):
+    if not common.isDiscordRegulator(ctx.message.author):
+        return
+
+    # get the current PID to tell the use
+    pid = os.getpid()
+    await discord.bot.say("{0.message.author.mention} Freezing all motor functions for PID:`{1}`. See you again soon <3".format(ctx, pid))
+
+    # commit sudoku
+    sys.exit()
 
 #eval
 @admin.command(pass_context=True, hidden=True)
