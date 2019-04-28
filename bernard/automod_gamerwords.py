@@ -39,15 +39,32 @@ def regex_scoring_msg(msg):
     regex_mapping = config.cfg['automod']['regex_banned_words']
 
     msg_score = 0 # set the base score to 0
+    msg_found = [] # build empty list for gamer words found
     for regex, weight in regex_mapping.items(): # loop through every regex case
         for word in msg.split(): # split the string up into words for multiplyers (someone spamming same slur over and over)
             for match in re.findall("\\b"+regex+"\\b", word, re.IGNORECASE): # search that word against the regex
                 msg_score += weight # add up the score
+                msg_found.append(word) # add the list
                 #print(msg, match, regex, weight)
 
     if msg_score is not 0:
-        logger.info("regex_scoring_message(): WEIGHT: {}, MSG: {}".format(msg_score, msg))
-    return msg_score
+        print("regex_scoring_message(): WEIGHT: {}, MSG: {}".format(msg_score, msg))
+
+    # build a dict to return that contains the score (int), and lists of words found clean/dirty
+    return {
+        "score": msg_score,
+        "words": msg_found
+    }
+    
+
+def censor_word(word):
+    wordlen = len(word)
+
+    # get the first and last char
+    wordfirst = word[0]
+    wordlast = word[-1]
+
+    return wordfirst + "*" * (wordlen-2) + wordlast
 
 def member_age_scoring(age):
     # in minutes, format: age, multiplier
@@ -131,10 +148,10 @@ def get_punishment_tier(score):
 
 async def slur_filter(message):
     # get the score of the message contents
-    msg_score = regex_scoring_msg(message.content)
+    regex_result = regex_scoring_msg(message.content)
 
     # if the message scored 0, we can ignore
-    if msg_score == 0:
+    if regex_result['score'] == 0:
         return
 
     # if we got this far, we need to lookup their account age
@@ -149,9 +166,9 @@ async def slur_filter(message):
 
     multiplier = account_age_score + account_member_score
     if multiplier is not 0:
-        final_score = (msg_score * multiplier) + account_previous_score
+        final_score = (regex_result['score'] * multiplier) + account_previous_score
     else:
-        final_score = msg_score + account_previous_score
+        final_score = regex_result['score'] + account_previous_score
 
     if final_score == 0:
         return # fail safe if the score is 0
@@ -163,8 +180,14 @@ async def slur_filter(message):
     # decide how hard to punish the user, and punish them
     punishment = get_punishment_tier(final_score)
 
+    # Get a censored string of what the user said to get automodded
+    clean_gamerwords = []
+    for gamerword in regex_result['words']:
+        clean_gamerwords.append(censor_word(gamerword))
+    clean_modded_words = ','.join(clean_gamerwords)
+
     # alert the user to what they have done
-    await discord.bot.send_message(message.channel, "{0.author.mention} is being automoderated with enforcement **{1}** for use of GAMER™ words. Score:`{2}`".format(message, punishment, final_score))
+    await discord.bot.send_message(message.channel, "{0.author.mention} is being automoderated with enforcement **{1}**: `({2})`".format(message, punishment, clean_modded_words))
     await asyncio.sleep(2) # sleep for 2 seconds until the ban is fired
 
     if punishment == "BAN_PERMA":
@@ -191,7 +214,7 @@ async def slur_filter(message):
                 channel=message.channel.id,
                 timestamp=time_to_fire,
                 event="UNBAN_MEMBER",
-                msg="Automod (Gamerwords) SCORE:{0}".format(final_score))
+                msg="Automod SCORE:{0} WORDS:{1}".format(final_score, clean_modded_words))
 
     elif punishment == "KICK":
         punishment_journal_type = "KICK_MEMBER"
@@ -209,7 +232,7 @@ async def slur_filter(message):
         journal.update_journal_regulator(
             invoker=discord.bot.user.id,
             target=message.author.id,
-            eventdata="Automod POLICY:{0} SCORE:{1}".format(punishment, final_score),
+            eventdata="Automod POLICY:{0} SCORE:{1} WORDS:{2}".format(punishment, final_score, clean_modded_words),
             action=punishment_journal_type,
             messageid=message.id)
 
@@ -217,5 +240,5 @@ async def slur_filter(message):
     database.cursor.execute('INSERT INTO automod_gamerwords'
                             '(score_final, score_regex, score_prev_infractions, multiply_age_member, multiply_age_account, action, time, id_targeted, message)'
                             'VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)',
-                            (final_score, msg_score, account_previous_score, account_member_score, account_age_score, punishment, time.time(), message.author.id, message.content))
+                            (final_score, regex_result['score'], account_previous_score, account_member_score, account_age_score, punishment, time.time(), message.author.id, message.content))
     database.connection.commit()
