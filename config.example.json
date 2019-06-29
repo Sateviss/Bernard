@@ -40,7 +40,8 @@
 	},
 
 	"regulators":{
-		"unban_grace_mins":4320
+		"unban_grace_mins":4320,
+		"unprotected_roles":["585533353248292887"]
 	},
 
 	"housekeeping":{

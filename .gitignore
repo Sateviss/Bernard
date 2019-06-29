@@ -4,3 +4,4 @@ bernard.db
 .vscode
 .mypy_cache
 .idea
+.DS_Store
