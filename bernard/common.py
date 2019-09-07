@@ -134,7 +134,6 @@ def dbtable_to_strtable(dbres):
         return postdb
 
 async def getJSON(url, tmout=5, hdrs=None):
-    url_safe = url.replace(config.cfg['subscriber']['provider']['privatekey'], "<HIDDEN>")
     url_safe = url_safe.replace(config.cfg['discord']['token'], "<HIDDEN>")
     logger.info("common.getJSON() attempting async URL {0} Timeout:{1}s".format(url_safe, tmout))
     try:

@@ -5,7 +5,6 @@ import bernard.analytics as analytics
 import bernard.database as database
 import bernard.invites as invites
 import bernard.journal as journal
-import bernard.subscriber as subscriber
 import logging
 import asyncio
 import datetime
@@ -58,10 +57,6 @@ async def on_member_join(user):
                 logger.warn("on_member_join() KICKING ID {0.id} for being too new. Account age was {1} minutes, config is {2} minute age.".format(user, account_age_minutes, config.cfg['auditing']['account_age_min']['min_age_required']))
                 await discord.bot.kick(user)
 
-    #do a subscriber check and assign any roles on joining
-    if config.cfg['subscriber']['enable']:
-        check_sub = subscriber.subscriber_update(user)
-        await check_sub.update_subscriber()
 
     #capture the event in the internal log
     journal.update_journal_event(module=__name__, event="ON_MEMBER_JOIN", userid=user.id, contents="{0.name}#{0.discriminator}".format(user))
@@ -86,9 +81,6 @@ async def on_member_remove(user):
     #remove any invites from this user
     await invites.on_member_leave_invite_cleanup(user)
 
-    #remove any cached subscriber information
-    subscriber.on_member_remove_purgedb(user)
-
     #capture the event in the internal log
     journal.update_journal_event(module=__name__, event="ON_MEMBER_REMOVE", userid=user.id, contents="{0.name}#{0.discriminator}".format(user))
 
@@ -107,8 +99,6 @@ async def on_member_ban(member):
     #remove any invites from this user
     await invites.on_member_leave_invite_cleanup(member)
 
-    #remove any cached subscriber information
-    subscriber.on_member_remove_purgedb(member)
 
     #capture the event in the internal log
     journal.update_journal_event(module=__name__, event="ON_MEMBER_BANNED", userid=member.id, contents="{0.name}#{0.discriminator}".format(member))

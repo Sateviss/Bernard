@@ -48,11 +48,6 @@ async def get_allowed_groups():
     for role in config.cfg['regulators']['unprotected_roles']:
         untouchable_roles.remove(role)
 
-    #remove destinygg subscriber roles
-    if config.cfg['subscriber']['enable']:
-        for k,v in config.cfg['subscriber']['features'].items():
-            untouchable_roles.remove(v)
-
 #this starts get_allowed_groups() at startup, but requires the bot to be ready
 discord.bot.loop.create_task(get_allowed_groups())
 

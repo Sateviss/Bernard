@@ -30,9 +30,6 @@ import bernard.regulator
 # Automoderation modules
 import bernard.automod_gamerwords
 
-#entitlement modules
-import bernard.subscriber
-
 #background jobs
 import bernard.scheduler
 import bernard.remind

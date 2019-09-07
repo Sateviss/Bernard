@@ -110,40 +110,5 @@
 			"min_age_required":1440,
 			"enforcement":"ban"
 		}
-	},
-
-	"subscriber":{
-		"enable":0,
-		"provider":{
-			"endpoint":"https://www.destiny.gg/auth/info",
-			"privatekey":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-			"timestamp":"%%Y-%%m-%%dT%%H:%%M:%%S+0000"
-		},
-		"settings":{
-			"grace_days":1,
-			"verified_days":14
-		},
-		"updater_background":{
-			"enable":1,
-			"start_delay":3600,
-			"interval":86400
-		},
-		"auditor_background":{
-			"enable":1,
-			"start_delay":90000,
-			"interval":86400
-		},
-		"database_background":{
-			"enable":1,
-			"start_delay":7200,
-			"interval":43200
-		},
-		"features":{
-			"dgg":"564924157322592290",
-			"tier1":"564924104663367722",
-			"tier2":"563129025887862795",
-			"tier3":"564924146849415183",
-			"tier4":"564924152956452875"
-		}
 	}
 }
