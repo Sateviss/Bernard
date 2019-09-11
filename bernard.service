@@ -1,6 +1,7 @@
 [Unit]
 Description=Bernard3 - Destiny.GG Discord Bot
 After=network.target
+Requires=mysql.service
 
 [Service]
 Type=simple
