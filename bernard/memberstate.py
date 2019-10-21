@@ -32,6 +32,10 @@ async def on_member_join(user):
 
     if retdb is not None:
         ignore_depart.append(user.id)
+        try:
+            await discord.bot.send_message(user, "You are being retroactively banned with the reason of {}\n You can try begging for an unban here: {}".format(retdb['reason'], config.cfg['bernard']['unban_form']))
+        except discord.commands.errors.CommandInvokeError:
+            pass
         await common.ban_verbose(user, "RETROACTIVE_BAN_VIA_BOT_DB - '{}'".format(retdb['reason']))
         await discord.bot.send_message(discord.mod_channel(),"{0} **Retroactive Ban:** {1.mention} (Name:`{1.name}#{1.discriminator}` ID:`{1.id}` REASON: `{2}`)".format(common.bernardUTCTimeNow(), user, retdb['reason']))
         journal.update_journal_event(module=__name__, event="RETROACTIVE_BAN", userid=user.id, contents=retdb['reason'])
@@ -52,9 +56,17 @@ async def on_member_join(user):
             await asyncio.sleep(3)
             if config.cfg['auditing']['account_age_min']['enforcement'] == "ban":
                 logger.warn("on_member_join() BANNING ID {0.id} for being too new. Account age was {1} minutes, config is {2} minute age..".format(user, account_age_minutes, config.cfg['auditing']['account_age_min']['min_age_required']))
+                try:
+                    await discord.bot.send_message(user, "You are being automatically banned because your account is too new")
+                except discord.commands.errors.CommandInvokeError:
+                    pass
                 await common.ban_verbose(user, "BOT_BAN_VIA_ACCOUNT_TOONEW - {} min old".format(account_age_minutes))
             else:
                 logger.warn("on_member_join() KICKING ID {0.id} for being too new. Account age was {1} minutes, config is {2} minute age.".format(user, account_age_minutes, config.cfg['auditing']['account_age_min']['min_age_required']))
+                try:
+                    await discord.bot.send_message(user, "You are automatically being kicked because your account is too new")
+                except discord.commands.errors.CommandInvokeError:
+                    pass
                 await discord.bot.kick(user)
 
 

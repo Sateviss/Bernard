@@ -180,6 +180,10 @@ async def kick(ctx, target, *, reason):
 
     if allow_regulation(ctx.message, target_id):
         #return what is happening in the same channel to alert the user, wait 5 seconds and fire the kick command
+        try:
+            await discord.bot.send_message(target_member, "You are being kicked with the reason of {}".format(reason))
+        except discord.commands.errors.CommandInvokeError:
+            pass
         await discord.bot.say("✔️ {} is kicking {} with the reason of `{}`.".format(ctx.message.author.mention, target_member.mention, reason))
         await asyncio.sleep(5)
         await discord.bot.kick(target_member)
@@ -218,6 +222,10 @@ async def ban(ctx, target, *, reason):
     #if we have a Member object, it is not retroactive and can be run live against discord
     if target_member is not None:
         await discord.bot.say("✔️ {} is **BANNING** {} with the reason of `{}`.".format(ctx.message.author.mention, target_member.mention, reason))
+        try:
+            await discord.bot.send_message(target_member, "You are being **BANNED** with the reason of {}\n You can try begging for an unban here: {}".format(reason, config.cfg['bernard']['unban_form']))
+        except discord.commands.errors.CommandInvokeError:
+            pass
         await asyncio.sleep(5)
         res = await common.ban_verbose(target_member, "{} - '{}'".format(ctx.message.author.name, reason))
         if res is False:
@@ -285,6 +293,10 @@ async def timedban(ctx, target, duration, *, reason):
             msg=reason)
 
         await discord.bot.say("✔️ {0.message.author.mention} is **BANNING** {1} with the reason of `{2}`. (Duration: {3}, Unban at:`{4}`)".format(ctx, target_member.mention, reason, duration, when_nice))
+        try:
+            await discord.bot.send_message(target_member, "You are being **BANNED** with the reason of {} (Duration: {}, Unban at:`{}`)\n You can try begging for an unban here: {}".format(reason, duration, when_nice, config.cfg['bernard']['unban_form']))
+        except discord.commands.errors.CommandInvokeError:
+            pass
         await asyncio.sleep(5)
 
         #ship the ban off to discord

@@ -15,6 +15,7 @@
 		"timestamp":"%a %b %d %H:%M:%S UTC %Y",
 		"activity_channel":"273164941857652737",
 		"message_channel":"273164941857652737",
+		"unban_form": "http://bit.ly/dggUnbanForm",
 		"gamestatus":"Westworld",
 		"ratelimit":30,
 		"messagecache":10000,

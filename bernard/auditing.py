@@ -101,6 +101,10 @@ async def blacklisted_domains(msg):
         elif dbres['action'] == "kick":
             logger.warn("blacklisted_domains() user kick from domain {0[domain]} for user {1.author} ({1.author.id})".format(dbres, msg))
             await discord.bot.delete_message(msg)
+            try:
+                await discord.bot.send_message(msg.author, "That domain `{}` is prohibited with the policy to kick poster.".format(dbres["domain"]))
+            except discord.commands.errors.CommandInvokeError:
+                pass
             await discord.bot.send_message(msg.channel, "🛑 {0.author.mention} that domain `{1[domain]}` is prohibited here with the policy to kick poster. Kicking...".format(msg, dbres))
             await discord.bot.kick(msg.author)
             journal.update_journal_event(module=__name__, event="AUDIT_DOMAIN_KICK", userid=msg.author.id, eventid=msg.id, contents=dbres['domain'])
@@ -108,6 +112,10 @@ async def blacklisted_domains(msg):
         elif dbres['action'] == "ban":
             logger.warn("blacklisted_domains() user ban from domain {0[domain]} for user {1.author} ({1.author.id})".format(dbres, msg))
             await discord.bot.delete_message(msg)
+            try:
+                await discord.bot.send_message(msg.author, "That domain `{}` is prohibited with the policy to **BAN** poster.\n You can try begging for an unban here: {}".format(dbres["domain"], config.cfg['bernard']['unban_form']))
+            except discord.commands.errors.CommandInvokeError:
+                pass
             await discord.bot.send_message(msg.channel, "🛑 {0.author.mention} that domain `{1[domain]}` is prohibited here with the policy to **BAN** poster. Banning...".format(msg, dbres))
             await common.ban_verbose(msg.author, "BOT_AUTOBAN_FOR_BLACKLISTED_DOMAIN - 'Domain:{0[domain]} URL:{1}'".format(dbres, url))
             journal.update_journal_event(module=__name__, event="AUDIT_DOMAIN_BAN", userid=msg.author.id, eventid=msg.id, contents=dbres['domain'])

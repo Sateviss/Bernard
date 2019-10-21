@@ -188,6 +188,16 @@ async def slur_filter(message):
 
     # alert the user to what they have done
     await discord.bot.send_message(message.channel, "{0.author.mention} is being automoderated with enforcement **{1}**: `({2})`".format(message, punishment, clean_modded_words))
+    try:
+        await discord.bot.send_message(
+            message.author,
+            "You are being automoderated with enforcement **{}**: `({})`".format(
+                punishment,
+                clean_modded_words
+            ) + "\n You can try begging for an unban here: {}".format(config.cfg['bernard']['unban_form']) if punishment == "BAN_PERMA" else ""
+        )
+    except discord.commands.errors.CommandInvokeError:
+        pass
     await asyncio.sleep(2) # sleep for 2 seconds until the ban is fired
 
     if punishment == "BAN_PERMA":
